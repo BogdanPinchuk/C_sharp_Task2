@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 // 0 - 1-й варіант
@@ -10,12 +11,13 @@ using System.Threading.Tasks;
 namespace App1
 {
     /// <summary>
-    /// Analysis of sentence
+    /// Analysis of sentence + Extention methods
     /// </summary>
     static class TextAnalysis
     {
         /// <summary>
-        /// Group sentences/text on count of letter (Групування речень по кількості букв)
+        /// Group sentences/text on count of letter (Групування речень по кількості букв) 
+        /// using StringBuilder
         /// </summary>
         /// <param name="s">sentence/text</param>
         /// <returns></returns>
@@ -40,7 +42,8 @@ namespace App1
         }
 
         /// <summary>
-        /// Group sentences/text on count of letter (Групування речень по кількості букв)
+        /// Group sentences/text on count of letter (Групування речень по кількості букв) 
+        /// using StringBuilder
         /// </summary>
         /// <param name="sb">sentence/text</param>
         /// <returns></returns>
@@ -55,6 +58,9 @@ namespace App1
             {
                 sb = sb.Remove(sb.Length - 1, 1);
             }
+
+            // delete "\n", "\t"
+            sb = sb.Replace("\n", " ").Replace("\t", " ");
 
             // guard operator (сторожовий оператор)
             if (sb.Length == 0)
@@ -73,6 +79,12 @@ namespace App1
             // cut on words (ріжем на "слова")
             while (sb.Length != 0)
             {
+                // trim the space on first, this space creates on last iteration
+                while (sb.Length > 0 && sb[0] == ' ')
+                {
+                    sb = sb.Remove(0, 1);
+                }
+
                 // counter - лічильник
                 int count = 0;
 
@@ -102,7 +114,97 @@ namespace App1
                 sb = sb.Remove(0, count);
             }
 
-            return default;
+            // delete duplicate words
+            for (int i = 0; i < sbOut.Count; i++)
+            {
+                sbOut[sbOut.Keys.ElementAt(i)] = sbOut[sbOut.Keys.ElementAt(i)].Distinct().ToList();
+            }
+
+            return sbOut;
         }
+
+        /// <summary>
+        /// Returns the data in SortedDictionary in console (Виводить дані SD в консоль)
+        /// </summary>
+        /// <param name="data">data of sorted dictionary (дані SD)</param>
+        public static void ToPresent(this SortedDictionary<int, List<string>> data)
+        {
+            if (data == null)
+            {
+                return;
+            }
+
+            foreach (var i in data)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"Words of length: {i.Key}, Count: {i.Value.Count}");
+                Console.ResetColor();
+                foreach (var j in i.Value)
+                {
+                    Console.WriteLine($"\t{j}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Group sentences/text on count of letter (Групування речень по кількості букв) 
+        /// using String
+        /// </summary>
+        /// <param name="s">sentence/text</param>
+        /// <returns></returns>
+        public static SortedDictionary<int, List<string>> GetGroupOfWords1(params string[] strArray)
+        {
+            // guard operator (сторожовий оператор)
+            if (strArray.Length == 0)
+            {
+                return null;
+            }
+
+            string s = string.Empty;
+
+            {
+                // create string builder
+                StringBuilder sb = new StringBuilder();
+
+                foreach (string i in strArray)
+                {
+                    sb.Append(i + ' ');
+                }
+
+                s = sb.ToString();
+            }
+
+            // create SortedDictionary
+            SortedDictionary<int, List<string>> sbOut
+                = new SortedDictionary<int, List<string>>();
+
+            // use Regular Expresion
+            string pattern = @"\S+";
+            Regex regex = new Regex(pattern);
+
+            MatchCollection collection = regex.Matches(s);
+
+            foreach (Match i in collection)
+            {
+                // save word in sorted dictionary
+                if (sbOut.ContainsKey(i.Length))
+                {
+                    sbOut[i.Length].Add(i.Value);
+                }
+                else  // if key is absent (якщо ключ відсутній)
+                {
+                    sbOut.Add(i.Length, new List<string>() { i.Value });
+                }
+            }
+
+            // delete duplicate words
+            for (int i = 0; i < sbOut.Count; i++)
+            {
+                sbOut[sbOut.Keys.ElementAt(i)] = sbOut[sbOut.Keys.ElementAt(i)].Distinct().ToList();
+            }
+
+            return sbOut;
+        }
+
     }
 }
