@@ -64,6 +64,11 @@ namespace App3
                 "Fibonacci number - approximation formula", min, max)).Start();
             #endregion
 
+            #region Iterative method
+            new Thread(() => PresentResult(FibIterative,
+                "Fibonacci number - iterative method", min, max)).Start();
+            #endregion
+
             // delay
             Console.ReadKey(true);
         }
@@ -138,6 +143,32 @@ namespace App3
 
             return fib(n);
         }
+
+        /// <summary>
+        /// Реалізація знаходження числа Фібоначі ітераційно
+        /// </summary>
+        /// <param name="n">номер члена</param>
+        /// <returns></returns>
+        private static int FibIterative(int n)
+        {
+            // create array
+            int[] array = new int[Math.Abs(n) + 1];
+
+            // base value
+            array[0] = 0;
+            if (Math.Abs(n) > 0)
+            {
+                array[1] = 1;
+            }
+
+            for (int i = 2; i < array.Length; i++)
+            {
+                array[i] = array[i - 1] + array[i - 2];
+            }
+
+            return ((n < 0) ? (int)Math.Pow(-1, n + 1) : 1) * array.Last();
+        }
+
 
         /// <summary>
         /// Реалізація знаходження числа Фібоначі за аналітичною формулою Біне
