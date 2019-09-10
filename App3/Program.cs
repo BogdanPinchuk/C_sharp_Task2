@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 // 1. https://en.wikipedia.org/wiki/Fibonacci_number
 // 2. http://www.maths.surrey.ac.uk/hosted-sites/R.Knott/Fibonacci/fibFormula.html
 // 3. https://uk.wikipedia.org/wiki/Золотий_перетин
+// 4. https://uk.wikipedia.org/wiki/Послідовність_Фібоначчі
 
 namespace App3
 {
@@ -67,6 +69,11 @@ namespace App3
             #region Iterative method
             new Thread(() => PresentResult(FibIterative,
                 "Fibonacci number - iterative method", min, max)).Start();
+            #endregion
+
+            #region Matrix method
+            new Thread(() => PresentResult(FibMatrix,
+                "Fibonacci number - matrix method", min, max)).Start();
             #endregion
 
             // delay
@@ -169,7 +176,6 @@ namespace App3
             return ((n < 0) ? (int)Math.Pow(-1, n + 1) : 1) * array.Last();
         }
 
-
         /// <summary>
         /// Реалізація знаходження числа Фібоначі за аналітичною формулою Біне
         /// </summary>
@@ -211,6 +217,59 @@ namespace App3
 
             // + округнення
             return (int)Math.Round(res, MidpointRounding.AwayFromZero);
+        }
+
+        /// <summary>
+        /// Реалізація знаходження числа Фібоначі на основі матриць
+        /// </summary>
+        /// <param name="n">номер члена</param>
+        /// <returns></returns>
+        private static int FibMatrix(int n)
+        {
+            // щоб не ускладнювати алгоритм і 
+            // не реалізовувати знаходження оберненої матриці A^-1 
+            if (n == 0)
+            {
+                return 0;
+            }
+
+            // Explain - пояснення
+            // f_n   = f_n-1 + f_n-2    : n-й член числа Фібоначі
+            // f_n-1 = f_n-1 + 0        : n-1-йчлен числа Фібоначі
+            // переписувмо в матрицю
+            // |f_n|   = |1 1| * |f_n-1| 
+            // |f_n-1|   |1 0|   |f_n-2|
+            // Якщо замінити  матриці на букви: X = A * M
+            // то для того щоб дійти до членів 0 і 1, необхідно перемнодити m раз матрицю A
+            // |f_n-n+1| = |1| = B
+            // |f_n-n  |   |0|
+            // отже X = A^(n-1) * B
+            // |f_n  | = |1 1|n-1 * |1|
+            // |f_n-1|   |1 0|      |0|
+            // а так як ми не можемо реалізувати вектор, то згідно правил перемноження матриць
+            // матрицю B можна замінити наступною
+            // |1| => |1 0|
+            // |0|    |0 0|
+            // при цьому отримаємо X
+            // |f_n   0| - звідки ми беремо лише необхідний нам член матриці
+            // |f_n-1 0|
+
+            // create matrix A
+            Matrix a = new Matrix(1, 1, 1, 0, 0, 0);
+            Matrix ac = a.Clone();
+            // create matrix B
+            Matrix b = new Matrix(1, 0, 0, 0, 0, 0);
+
+            // Multiply A^n
+            for (int i = 1; i < Math.Abs(n) - 1; i++)
+            {
+                a.Multiply(ac);
+            }
+
+            // Multiply A^(n-1) * B
+            a.Multiply(b);
+
+            return ((n < 0) ? (int)Math.Pow(-1, n + 1) : 1) * (int)a.Elements[0];
         }
 
     }
