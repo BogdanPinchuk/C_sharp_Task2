@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define show
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
@@ -13,6 +15,20 @@ using System.Threading.Tasks;
 // 2. http://www.maths.surrey.ac.uk/hosted-sites/R.Knott/Fibonacci/fibFormula.html
 // 3. https://uk.wikipedia.org/wiki/Золотий_перетин
 // 4. https://uk.wikipedia.org/wiki/Послідовність_Фібоначчі
+//
+// 1. Рекурсині методи - згідно літератури O(2^n - 1) => FibRecursionUsual, FibRecursionLambda
+// реалізовані як звичайним спомобом так і з використанням лямбда-виразів, 
+// недолік в тому, що (2^n - 1 - n) створюється додаткових гілок, які повторюють одні і ті самі обчислення
+// 2. Ітераційний метод - O(n) => FibIterative
+// 3. Аналітичні методи - O(1) => FibAnalyticFormula, FibApproximationFormula
+// 4. Матричний метод - згідно літератури O(ln(n)) => FibMatrix
+// Часові результати для розрахунку членів [-8, 35] (аналіз в релізі)
+// 1.1. FibRecursionUsual       - 4088,9198 мс (мілісекунд)
+// 1.2. FibRecursionLambda      - 3846,9775 мс
+// 2.   FibIterative            -  305,6891 мс
+// 3.1. FibAnalyticFormula      -    0,2334 мс
+// 3.2. FibApproximationFormula -    0,0226 мс
+// 4.   FibMatrix               -  305,6891 мс
 
 namespace App3
 {
@@ -108,7 +124,7 @@ namespace App3
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"Time: {time} ms");
                 Console.ResetColor();
-#if false
+#if show
                 foreach (var i in array)
                 {
                     Console.WriteLine($"\tF({i.Key}) = {i.Value}");
